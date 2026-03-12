@@ -34,5 +34,5 @@ Using R I generated bootstrap resamples from a gamma-distributed sample and anal
 * Bootstrap methods
 
 ## Files
-* `bootstrap_analysis.Rmd` - source analysis
-* `bootstrap_analysis.pdf` - rendered report
+* [bootstrap_analysis.Rmd](bootstrap_analysis.Rmd)- source analysis
+* [bootstrap_analysis.pdf](bootstrap_analysis.pdf) - rendered report
