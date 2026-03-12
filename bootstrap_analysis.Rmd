@@ -1,0 +1,173 @@
+---
+title: "Bootstrap Analysis of Sampling Distributions in R"
+author: "Reagan Carroll"
+output: pdf_document
+---
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(
+  echo = FALSE,
+  cache = TRUE,
+  fig.align = "center"
+)
+
+library(latex2exp)
+library(knitr)
+library(kableExtra)
+
+```
+
+## Overview
+
+This project explores the bootstrap as a method for estimating sampling distributions and estimator bias. Using a gamma-distributed sample in R, I generated bootstrap distributions for the sample mean and sample median, compared their shapes and variability, and evaluated how well the bootstrap distribution of the mean approximates the true theoretical sampling distribution.
+
+## Methods
+
+A random sample of size 16 was generated from a Gamma distribution with shape parameter ($r = 1$) and rate parameter ($\lambda = 1/2$). From this sample, I computed the observed sample mean and sample median. I then generated 100,000 bootstrap resamples with replacement and calculated the mean and median for each resample.
+
+```{r generate-data}
+
+set.seed(123)
+
+n <- 16
+shape <- 1
+rate <- 1/2
+
+samp <- rgamma(n, shape = shape, rate = rate)
+sampmean <- mean(samp)
+sampmed <- median(samp)
+
+N <- 10^5
+bootmean <- numeric(N)
+bootmed <- numeric(N)
+
+for (i in 1:N){
+  x <- sample(samp, replace = TRUE)
+  bootmean[i] <- mean(x)
+  bootmed[i] <- median(x)
+}
+
+```
+
+## Bootstrap Distribution of the Mean
+
+```{r bootmean-plot, out.width= "70%"}
+
+hist(
+  bootmean,
+  probability = TRUE,
+  main = "Bootstrap Distribution of the Sample Mean",
+  xlab = TeX("$\\bar{X}^*$", italic = TRUE),
+  breaks = 20
+)
+abline(v = sampmean, col = "red", lty = 2, lwd = 2)
+legend(
+  "right",
+  TeX("Observed sample mean $\\bar{X}$"),
+  col = "red",
+  lty = 2,
+  lwd = 2,
+  cex = 0.8
+)
+
+```
+
+The bootstrap distribution of the sample mean is approximately symmetric and bell-shaped and is centered near the observed sample mean $\bar{X}$.
+
+## Bootstrap Distribution of the Median
+
+```{r bootmed-plot, out.width = "70%"}
+
+hist(
+  bootmed,
+  probability = TRUE,
+  main = "Bootstrap Distribution of the Sample Median",
+  xlab = TeX("$Med^*$", italic = TRUE),
+  breaks = 20
+)
+abline(v = sampmed, col = "red", lty = 2, lwd = 2)
+legend(
+  "right",
+  "Observed sample median",
+  col = "red",
+  lty = 2,
+  lwd = 2,
+  cex = 0.8
+)
+
+```
+
+The bootstrap distribution of the sample median is more irregular and right-skewed, with a larger spread than that of the sample mean. This suggests greater sampling variability for the median when data come from a skewed population and the sample size is small.
+
+## Bootstrap Bias Estimates
+
+The bootstrap estimate of bias for an estimator $\hat{\theta}$ is $$\widehat{\mathrm{Bias}}_{boot}(\hat{\theta}) = \bar{\theta}^* - \hat{\theta}.$$
+
+```{r bias-estimates}
+
+meanbias <- mean(bootmean) - sampmean
+medbias <- mean(bootmed) - sampmed
+
+biastab <- data.frame(
+  Estimator = c("Sample Mean", "Sample Median"),
+  Boot_bias_est = c(meanbias, medbias)
+)
+
+kable(
+  biastab,
+  col.names = c("Estimator", "Estimated Bootstrap Bias"),
+  digits = 6
+)
+
+```
+
+The estimated bootstrap bias is very small for both estimators, although the sample median shows greater variability in its bootstrap distribution.
+
+## Comparison with the Theoretical Sampling Distribution
+
+For the sample mean, the theoretical sampling distribution is available in closed form. Because the original data come from a Gamma distribution, the sampling distribution of $\bar{X}$ is $$\bar{X} \sim Gamma(nr, n\lambda) = Gamma(16,8).$$
+
+```{r theoretic-comp, out.width = "70%"}
+
+hist(
+  bootmean,
+  probability = TRUE,
+  main = "Bootstrap Distribution of the Sample Mean",
+  xlab = TeX("$\\bar{X}^*$", italic = TRUE),
+  breaks = 20,
+  ylim = c(0, 0.9)
+)
+abline(v = sampmean, col = "red", lty = 2, lwd = 2)
+curve(dgamma(x, n * shape, n * rate), col = "blue", lwd = 2, add = TRUE)
+abline(v = shape / rate, col = "darkgreen", lty = 2, lwd = 2)
+legend(
+  "topright",
+  c(
+    TeX("Theoretical Sampling Distribution of $\\bar{X}$"),
+    TeX("Observed sample mean $\\bar{X}$"),
+    TeX("Population mean $E[X] = r/\\lambda$")
+  ),
+  col = c("blue", "red", "darkgreen"),
+  lty = c(1, 2, 2),
+  lwd = 2,
+  cex = 0.7
+)
+
+```
+
+The bootstrap distribution of the sample mean closely resembles the theoretical sampling distribution in both shape and spread. As expected, the bootstrap distribution is centered near the observed sample mean rather than the population mean, since it resamples the observed data. This indicates that the bootstrap provides a good approximation to the sampling variability of the mean in this setting.
+
+Unlike the sample mean, the sampling distribution of the sample median does not have a simple closed form expression here. This makes the bootstrap especially useful for studying the variability and distributional shape of the median.
+
+## Key Findings
+
+* The bootstrap distribution of the sample mean is approximately symmetric and closely matches the theoretical sampling distribution.
+* The sample mean has very little estimated bootstrap bias.
+* The bootstrap distribution of the sample median is more irregular and right-skewed.
+* The sample median shows greater sampling variability than the sample mean under a skewed population and small sample size.
+* The bootstrap is especially valuable for estimators such as the median when a simple theoretical sampling distribution is not readily available.
+
+## Reproducibility
+
+All simulations, plots, and calculations were performed in R using a fixed random seed.
