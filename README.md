@@ -11,6 +11,13 @@ Using R I generated bootstrap resamples from a gamma-distributed sample and anal
 * Compare empirical bootstrap results with a known theoretical distribution
 * Interpret how skewness affects estimator variability
 
+## Tools Used
+
+* R
+* R Markdown
+* Statistical simulation
+* Bootstrap methods
+
 ## Methods
 
 * Generated a random sample of size 16 from a Gamma distribution
@@ -26,13 +33,7 @@ Using R I generated bootstrap resamples from a gamma-distributed sample and anal
 * The bootstrap distribution of the sample median is more irregular and right-skewed.
 * The median shows greater sampling variability when data come from a skewed population.
 
-## Tools Used
-
-* R
-* R Markdown
-* Statistical simulation
-* Bootstrap methods
-
 ## Files
-* [bootstrap_analysis.Rmd](bootstrap_analysis.Rmd)- source analysis
-* [bootstrap_analysis.pdf](bootstrap_analysis.pdf) - rendered report
+
+* [Source Analysis (R)](bootstrap_analysis.Rmd)
+* [Rendered Report (PDF)](bootstrap_analysis.pdf)
